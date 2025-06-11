@@ -1,0 +1,30 @@
+{
+  "id_idoso": "d3b7f7ae-8b23-4a8d-9223-f20d2752b5de",
+  "alarmes": [
+    {
+      "titulo": "Acordar",
+      "horario": "08:00",
+      "dias": ["segunda", "quarta", "sexta"],
+      "repetir": true
+    }
+  ],
+  "notificacoes": [
+    {
+      "mensagem": "Tomar remédio",
+      "horario": "12:00",
+      "urgente": false
+    }
+  ],
+  "lembretes": [
+    {
+      "texto": "Fazer caminhada",
+      "ativo": false
+    }
+  ],
+  "log": [
+    {
+      "acao": "criado alarme",
+      "data": "2025-05-26T12:30:00Z"
+    }
+  ]
+}
