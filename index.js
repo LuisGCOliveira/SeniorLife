@@ -11,9 +11,9 @@ mongo.connect();
 
 const pg = new PostgresDB({
     host: 'localhost',
-    user: 'seu_usuario',
-    password: 'sua_senha',
-    database: 'seniorlife',
+    user: 'postgres',
+    password: '1234',
+    database: 'Senior_life',
     port: 5432,
 });
 const knexInstance = pg.getConnection();
