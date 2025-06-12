@@ -121,6 +121,12 @@ export async function login(req, res) {
     if (!senhaCorreta) {
       return res.status(401).json({ erro: 'Email ou senha inválidos.' });
     }
+    //Autenticação com JWT
+    const token = jwt.sign(
+     { id: acompanhante.id, tipo: 'acompanhante' }, // payload
+     process.env.JWT_SECRET || 'seuSegredoJWT',     // segredo seguro
+     { expiresIn: '1h' }
+);
 
     res.status(200).json({
       mensagem: 'Login realizado com sucesso!',
