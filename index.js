@@ -1,41 +1,88 @@
-//importando os pacotes para uso no arquivo index.js
+/**
+ * @file Main application file (entry point) for the SeniorLife backend server.
+ * This file sets up the Express server, connects to databases,
+ * configures middleware, mounts application routes, initializes Socket.IO,
+ * and starts the scheduler service.
+ */
 
+// 1. Importing core packages
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { MongoDB, PostgresDB } = require('./Model/conn');
+const http = require('http'); // Required for Socket.IO
+const { Server } = require("socket.io"); // Socket.IO Server class
+const dotenv = require('dotenv'); // Import dotenv
 
-const mongo = new MongoDB('mongodb://localhost:27017/seniorlife');
-mongo.connect();
+// Load environment variables from .env file
+dotenv.config(); // Isso deve vir antes de qualquer código que use process.env
 
-const pg = new PostgresDB({
-    host: 'localhost',
-    user: 'postgres',
-    password: '1234',
-    database: 'Senior_life',
-    port: 5432,
-});
-const knexInstance = pg.getConnection();
-//criando um servidor express
+// 2. Importing pre-configured database connection instances
+const { mongoConnection, postgresConnection } = require('./Config/instaceConn.js');
 
+// 3. Importing route handlers
+const routineRoutes = require('./Api/Routes/routineRouters.js');
+const dependentRoutes = require('./Api/Routes/dependenteRoutes.js');
+const caregiverRoutes = require('./Api/Routes/acompanhanteRoutes.js');
+
+// 4. Importing custom modules/services
+const initializeSocketManager = require('./socketManager.js'); // Path to your socketManager
+const schedulerService = require('./Services/scheduleServices.js'); // Path to your schedulerService
+const AppError = require('./Utils/appError.js'); // Import AppError para o handler 404
+
+// 5. Importing middleware by errors
+const errorHandler = require('./Api/Middleware/errorMiddleware.js'); // Corrigido o nome da variável
+
+// --- DATABASE CONNECTIONS ---
+mongoConnection.connect();
+const knexInstance = postgresConnection.getConnection();
+
+// --- EXPRESS SERVER AND SOCKET.IO CONFIGURATION ---
 const app = express();
+const server = http.createServer(app); // Create HTTP server from Express app
 
-// aplicando as configuraçes dentro do servidor express, adicionando os pacotes
+// Initialize Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Adjust to your client's URL in production for security
+    methods: ["GET", "POST"]
+  }
+});
 
+// Initialize Socket.IO manager (authentication, rooms, etc.)
+initializeSocketManager(io);
+
+// Applying middleware to Express app
 app.use(morgan('dev'));
-app.use(cors());
+app.use(cors()); // CORS for Express routes
 app.use(bodyParser.json());
-/* O body-parser.urlencoded() no Express.js é um middleware que analisa o corpo de uma requisição HTTP que contém dados codificados como URL. Isso é útil quando você está recebendo dados de formulários ou dados que foram enviados no formato application/x-www-form-urlencoded, que é o formato padrão para envio de dados de formulários HTML*/
 app.use(bodyParser.urlencoded({ extended: true }));
 
-knexInstance('usuarios').select('*').then(usuarios => {
-    console.log(usuarios);
-}).catch(err => {
-    console.error('Erro ao buscar usuários:', err);
+// --- MOUNTING APPLICATION ROUTES ---
+app.use('/api', routineRoutes);
+app.use('/api/dependents', dependentRoutes);
+app.use('/api/caregivers', caregiverRoutes);
+
+// --- DATABASE CONNECTION TEST (OPTIONAL) ---
+// ... (seu teste de conexão com Knex) ...
+
+// --- START SCHEDULER SERVICE ---
+schedulerService.run();
+
+// --- ERROR HANDLING MIDDLEWARES ---
+// Handler para rotas não encontradas (404) - DEVE VIR ANTES DO errorHandler global
+app.all('*', (req, res, next) => {
+  next(new AppError(`Não foi possível encontrar ${req.originalUrl} neste servidor!`, 404));
 });
 
-// o servidor irá rodar dentro da porta 3000
-app.listen(3000, () => {
-    console.log('Servidor rodando na porta 3000');
+// REGISTRO DO MIDDLEWARE DE ERRO GLOBAL - DEVE SER O ÚLTIMO!
+app.use(errorHandler);
+
+// --- SERVER INITIALIZATION ---
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => { // Express app now listens through the HTTP server
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Socket.IO initialized and listening.`);
 });
+
+module.exports = { app, io };

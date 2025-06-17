@@ -1,148 +1,164 @@
-import {criarDependente,listarDependentes,editarDependente,excluirDependente} from '../Model/dependenteModel.js';
-import bcrypt from 'bcrypt';
+/**
+ * @file Controller for handling dependent (idoso) related operations.
+ * All asynchronous operations are wrapped with `catchAsync` for centralized error handling.
+ */
+
+const bcrypt = require('bcrypt');
+const {
+  criarDependente,
+  listarDependentesPorAcompanhante,
+  editarDependente,
+  excluirDependente,
+  criarRelacaoAcompanhanteDependente,
+} = require('../Model/dependenteModel.js'); // Adjust path if necessary
+const AppError = require('../Utils/appError.js');
+const catchAsync = require('../Utils/catchAsync.js');
 
 /**
- * Controller responsável por criar um novo dependente (Create).
- * Recebe nome, email e senha no corpo da requisição.
+ * @async
+ * @function cadastrar
+ * @description Registers a new dependent and links them to the authenticated caregiver.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
  */
-export async function criar(req, res) {
-  try {
-    const { nome, email, senha } = req.body;
+exports.cadastrar = catchAsync(async (req, res, next) => {
+  const {
+    nome_completo,
+    email,
+    senha,
+    // ...other dependent fields
+  } = req.body;
 
-    if (!nome || !email || !senha) {
-      return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios.' });
-    }
+  const id_acompanhante = req.acompanhante?.id; // From authAcompanhante middleware
 
-    const novoDependente = await criarDependente({ nome, email, senha });
-
-    res.status(201).json({
-      mensagem: 'Dependente criado com sucesso!',
-      dependente: novoDependente,
-    });
-  } catch (err) {
-    res.status(400).json({ erro: err.message });
+  if (!nome_completo || !email || !senha) {
+    return next(new AppError('Full name, email, and password for the dependent are required.', 400));
   }
-}
+  if (!id_acompanhante) {
+    return next(new AppError('Caregiver authentication required.', 401)); // Should be caught by auth middleware
+  }
+
+  const senhaHash = await bcrypt.hash(senha, 10);
+  const dependentData = { nome_completo, email, senha: senhaHash /*, ...other fields */ };
+
+  const novoDependente = await criarDependente(dependentData);
+  if (!novoDependente || !novoDependente.id) {
+    return next(new AppError('Failed to create dependent entry. Model did not return expected data.', 500));
+  }
+
+  await criarRelacaoAcompanhanteDependente(id_acompanhante, novoDependente.id);
+
+  // Do not send password back
+  const { senha: _, ...dependenteInfo } = novoDependente;
+
+  res.status(201).json({
+    status: 'success',
+    message: 'Dependent registered and linked successfully!',
+    data: {
+      dependente: dependenteInfo,
+    }
+  });
+});
+
 /**
- * Controller responsável por listar todos os dependentes.
- * Retorna uma mensagem de sucesso e a lista de dependentes.
+ * @async
+ * @function consultar
+ * @description Retrieves a list of dependents associated with the authenticated caregiver.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
  */
-export async function consultar(req, res) {
-  try {
-    const lista = await listarDependentes();
-    res.status(200).json({
-      mensagem: 'Consulta realizada com sucesso!',
+exports.consultar = catchAsync(async (req, res, next) => {
+  const id_acompanhante = req.acompanhante?.id;
+
+  if (!id_acompanhante) {
+    return next(new AppError('Caregiver authentication required.', 401));
+  }
+
+  const lista = await listarDependentesPorAcompanhante(id_acompanhante);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Dependents retrieved successfully!',
+    results: lista.length,
+    data: {
       dependentes: lista,
-    });
-  } catch (err) {
-    res.status(500).json({ erro: err.message });
-  }
-}
+    }
+  });
+});
 
 /**
- * Controller responsável por editar um dependente.
- * Espera o ID como parâmetro de rota e os novos dados no corpo da requisição.
+ * @async
+ * @function editar
+ * @description Updates an existing dependent's information.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
  */
-export async function editar(req, res) {
-  try {
-    const { id } = req.params; // ID do dependente a ser editado
-    const { nome, email, senha } = req.body; // Novos dados
+exports.editar = catchAsync(async (req, res, next) => {
+  const { id: id_dependente } = req.params;
+  const updateData = req.body;
+  const id_acompanhante = req.acompanhante?.id; // From authAcompanhante middleware
 
-    const atualizado = await editarDependente(id, { nome, email, senha });
-
-    if (!atualizado) {
-      return res.status(404).json({ mensagem: 'Dependente não encontrado.' });
-    }
-
-    res.status(200).json({
-      mensagem: 'Dependente atualizado com sucesso!',
-      dependente: atualizado,
-    });
-  } catch (err) {
-    res.status(400).json({ erro: err.message });
+  if (!id_acompanhante) {
+      return next(new AppError('Caregiver authentication required.', 401));
   }
-}
+  // Authorization check (is this caregiver linked to this dependent?)
+  // should be handled by permissionMiddleware.js if applied to the route.
+
+  if (updateData.senha) {
+    if (updateData.senha.trim() === "") {
+        delete updateData.senha;
+    } else {
+        updateData.senha = await bcrypt.hash(updateData.senha, 10);
+    }
+  }
+  delete updateData.id; // Prevent ID update
+
+  const atualizado = await editarDependente(id_dependente, updateData);
+
+  if (!atualizado) {
+    return next(new AppError('Dependent not found or no changes made.', 404));
+  }
+
+  const { senha: _, ...dependenteInfo } = atualizado;
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Dependent updated successfully!',
+    data: {
+      dependente: dependenteInfo,
+    }
+  });
+});
 
 /**
- * Controller responsável por excluir um dependente.
- * Espera o ID como parâmetro de rota.
+ * @async
+ * @function excluir
+ * @description Deletes a dependent's record.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
  */
-export async function excluir(req, res) {
-  try {
-    const { id } = req.params; // ID do dependente a ser excluído
+exports.excluir = catchAsync(async (req, res, next) => {
+  const { id: id_dependente } = req.params;
+  const id_acompanhante = req.acompanhante?.id; // From authAcompanhante middleware
 
-    const excluido = await excluirDependente(id);
-
-    if (!excluido) {
-      return res.status(404).json({ mensagem: 'Dependente não encontrado.' });
-    }
-
-    res.status(200).json({ mensagem: 'Dependente excluído com sucesso!' });
-  } catch (err) {
-    res.status(400).json({ erro: err.message });
+  if (!id_acompanhante) {
+      return next(new AppError('Caregiver authentication required.', 401));
   }
-}
+  // Authorization check (is this caregiver linked to this dependent?)
+  // should be handled by permissionMiddleware.js if applied to the route.
 
-/**
- * Controller responsável por cadastrar um novo dependente.
- * Espera nome, email e senha no corpo da requisição (enviados pelo acompanhante).
- */
-export async function cadastrar(req, res) {
-  try {
-    const { nome, email, senha } = req.body;
+  const excluido = await excluirDependente(id_dependente);
 
-    // Validação básica dos campos
-    if (!nome || !email || !senha) {
-      return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios.' });
-    }
-
-    // Gera o hash da senha antes de salvar
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    // Cria o dependente no banco de dados
-    const novoDependente = await criarDependente({ nome, email, senha: senhaHash });
-
-    res.status(201).json({
-      mensagem: 'Dependente cadastrado com sucesso!',
-      dependente: novoDependente,
-    });
-  } catch (err) {
-    res.status(400).json({ erro: err.message });
-  }
-}
-
-
-/**
- * Controller responsável pelo login do acompanhante.
- * Espera email e senha no corpo da requisição.
- */
-export async function login(req, res) {
-  const { email, senha } = req.body;
-
-  // Validação dos campos obrigatórios
-  if (!email || !senha) {
-    return res.status(400).json({ erro: 'Email e senha são obrigatórios.' });
+  if (!excluido) { // Model should return truthy (e.g., rows affected > 0) or throw
+    return next(new AppError('Dependent not found or already deleted.', 404));
   }
 
-  try {
-    // Busca o acompanhante pelo email
-    const acompanhante = await buscarAcompanhantePorEmail(email);
-
-    // Verifica se encontrou e se a senha está correta
-    if (!acompanhante || !(await bcrypt.compare(senha, acompanhante.senha))) {
-      return res.status(401).json({ erro: 'Email ou senha inválidos.' });
-    }
-
-    // Login bem-sucedido
-    res.status(200).json({
-      mensagem: 'Login realizado com sucesso!',
-      acompanhante: {
-        id: acompanhante.id,
-        nome: acompanhante.nome,
-        email: acompanhante.email,
-      },
-    });
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao realizar login.' });
-  }
-}
+  res.status(200).json({ // Or 204 with no content
+    status: 'success',
+    message: 'Dependent deleted successfully!'
+  });
+});
