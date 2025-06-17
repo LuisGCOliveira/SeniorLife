@@ -4,7 +4,7 @@
  */
 
 const { postgresConnection } = require('../../Config/instaceConn.js'); // Or '../Config/conn.js'
-const AppError = require('../../Utils/appError'); // Import AppError
+const AppError = require('../../Utils/appError.js'); // Import AppError
 
 const knex = postgresConnection.getConnection();
 

@@ -6,8 +6,8 @@
  */
 
 const jwt = require('jsonwebtoken');
-const AppError = require('../../Utils/appError'); // Adjust path if AppError is located elsewhere
-const acompanhanteModel = require('../../Model/acompanhanteModel'); // Adjust path to your model
+const AppError = require('../../Utils/appError.js'); // Adjust path if AppError is located elsewhere
+const acompanhanteModel = require('../../Model/acompanhanteModel.js'); // Adjust path to your model
 
 /**
  * @async

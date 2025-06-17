@@ -5,18 +5,18 @@
  */
 
 const express = require('express');
-const routineController = require('../../Controller/routineController');
+const routineController = require('../../Controller/routineController.js');
 
 // Import authentication and permission middlewares
-const { autenticarAcompanhante } = require('../Middleware/authAcompanhante.js');
-const { checkCaregiverPermission } = require('../Middleware/permissionMiddleware.js');
+const { autenticarAcompanhante } = require('./Api/Middleware/authAcompanhante.js');
+const { checkCaregiverPermission } = require('./Api/Middleware/permissionMiddleware.js');
 
 // Import validation middlewares
 const {
   validateCreateActivity,
   validateUpdateActivity,
   validateParams
-} = require('../Middleware/validatorMiddleware.js'); // Adjust path if necessary
+} = require('./Validators/validatorMiddleware.js'); // Adjust path if necessary
 
 const router = express.Router();
 
@@ -101,5 +101,6 @@ router.delete(
   validateParams,             // Validate URL parameters
   routineController.deleteActivity
 );
+
 
 module.exports = router;

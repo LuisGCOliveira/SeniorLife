@@ -4,7 +4,7 @@
  */
 
 const { body, param, validationResult } = require('express-validator');
-const AppError = require('../../Utils/appError'); // Import AppError
+const AppError = require('../../../Utils/appError.js'); // Import AppError
 
 /**
  * @description A helper middleware to check for validation errors.

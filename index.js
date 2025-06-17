@@ -21,9 +21,9 @@ dotenv.config(); // Isso deve vir antes de qualquer código que use process.env
 const { mongoConnection, postgresConnection } = require('./Config/instaceConn.js');
 
 // 3. Importing route handlers
-const routineRoutes = require('./Api/Routes/routineRouters.js');
-const dependentRoutes = require('./Api/Routes/dependenteRoutes.js');
-const caregiverRoutes = require('./Api/Routes/acompanhanteRoutes.js');
+const routineRouters = require('./Api/Routes/routineRouters.js');
+const dependenteRoutes = require('./Api/Routes/dependenteRoutes.js');
+const acompanhanteRoutes = require('./Api/Routes/acompanhanteRoutes.js');
 
 // 4. Importing custom modules/services
 const initializeSocketManager = require('./socketManager.js'); // Path to your socketManager
@@ -59,9 +59,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // --- MOUNTING APPLICATION ROUTES ---
-app.use('/api', routineRoutes);
-app.use('/api/dependents', dependentRoutes);
-app.use('/api/caregivers', caregiverRoutes);
+app.use('/api', routineRouters);
+app.use('/api/dependents', dependenteRoutes);
+app.use('/api/caregivers', acompanhanteRoutes);
 
 // --- DATABASE CONNECTION TEST (OPTIONAL) ---
 // ... (seu teste de conexão com Knex) ...

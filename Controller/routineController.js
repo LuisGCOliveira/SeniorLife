@@ -4,8 +4,8 @@
  * delegate error handling, and then send back a response to the client.
  */
 
-const routineService = require('../Services/routineServices.js');
-const AppError = require('../Utils/appError'); // Import AppError
+const routineServices = require('../Services/routineServices.js');
+const AppError = require('../Utils/appError.js'); // Import AppError
 const catchAsync = require('../Utils/catchAsync.js');
 
 /**
@@ -34,7 +34,7 @@ const createActivity = catchAsync(async (req, res, next) => {
     return next(new AppError("Activity data is required in the request body.", 400));
   }
 
-  const newActivity = await routineService.createActivity(id_idoso, activityData);
+  const newActivity = await routineServices.createActivity(id_idoso, activityData);
 
   res.status(201).json({
     status: 'success',
@@ -58,7 +58,7 @@ const getActivities = catchAsync(async (req, res, next) => {
     return next(new AppError("Dependent ID (id_idoso) is required in URL parameters.", 400));
   }
 
-  const activities = await routineService.getActivitiesForDependent(id_idoso);
+  const activities = await routineServices.getActivitiesForDependent(id_idoso);
   res.status(200).json({
     status: 'success',
     results: activities.length,
@@ -82,7 +82,7 @@ const getActivityById = catchAsync(async (req, res, next) => {
     return next(new AppError("Dependent ID (id_idoso) and Activity ID (activityId) are required in URL parameters.", 400));
   }
 
-  const activity = await routineService.getActivityById(id_idoso, activityId);
+  const activity = await routineServices.getActivityById(id_idoso, activityId);
 
   if (!activity) {
     return next(new AppError('No activity found with that ID for this dependent.', 404));
@@ -114,7 +114,7 @@ const updateActivity = catchAsync(async (req, res, next) => {
     return next(new AppError("Update data is required in the request body.", 400));
   }
 
-  const updatedActivity = await routineService.updateActivity(id_idoso, activityId, updateData);
+  const updatedActivity = await routineServices.updateActivity(id_idoso, activityId, updateData);
 
   if (!updatedActivity) {
     return next(new AppError('No activity found with that ID to update for this dependent.', 404));
@@ -141,7 +141,7 @@ const deleteActivity = catchAsync(async (req, res, next) => {
     return next(new AppError("Dependent ID (id_idoso) and Activity ID (activityId) are required in URL parameters.", 400));
   }
 
-  const success = await routineService.deleteActivity(id_idoso, activityId);
+  const success = await routineServices.deleteActivity(id_idoso, activityId);
 
   if (!success) {
     return next(new AppError('No activity found with that ID to delete for this dependent.', 404));
@@ -166,7 +166,7 @@ const deleteAllActivities = catchAsync(async (req, res, next) => {
     return next(new AppError("Dependent ID (id_idoso) is required in URL parameters.", 400));
   }
 
-  const success = await routineService.deleteAllActivities(id_idoso);
+  const success = await routineServices.deleteAllActivities(id_idoso);
 
   if (!success) {
     // This implies the routine for the dependent was not found, so no activities to delete.

@@ -5,7 +5,7 @@
  * environments to provide appropriate error details.
  */
 
-const AppError = require('../../Utils/appError'); // Assuming AppError is in a Utils directory
+const AppError = require('../../Utils/appError.js'); // Assuming AppError is in a Utils directory
 
 /**
  * @function sendErrorDev
