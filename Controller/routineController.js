@@ -6,17 +6,14 @@
 
 const routineService = require('../Services/routineServices.js');
 const AppError = require('../Utils/appError'); // Import AppError
+const catchAsync = require('../Utils/catchAsync.js');
 
 /**
  * @description Utility function to catch errors in async middleware/controllers.
  * @param {function} fn - The async function to be executed.
  * @returns {function} A new function that handles errors and passes them to next().
  */
-const catchAsync = fn => {
-  return (req, res, next) => {
-    fn(req, res, next).catch(next); // Catches any error from fn and passes it to next()
-  };
-};
+
 
 /**
  * @description Controller to create a new activity for a dependent.
