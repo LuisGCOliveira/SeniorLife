@@ -226,6 +226,21 @@ const verificarRelacaoAcompanhanteDependente = async (id_acompanhante, id_depend
   }
 };
 
+/**
+ * Busca um dependente pelo email.
+ * @param {string} email
+ * @returns {Promise<object|null>}
+ */
+const buscarDependentePorEmail = async (email) => {
+  try {
+    const dependente = await db('dependente').where({ email }).first();
+    return dependente || null;
+  } catch (err) {
+    console.error('Erro ao buscar dependente por email:', err);
+    throw err;
+  }
+};
+
 module.exports = {
   criarDependente,
   listarDependentes,
@@ -236,4 +251,5 @@ module.exports = {
   listarDependentesPorAcompanhante,
   verificarRelacaoAcompanhanteDependente,
   buscarDependentePorNome,
+  buscarDependentePorEmail,
 };

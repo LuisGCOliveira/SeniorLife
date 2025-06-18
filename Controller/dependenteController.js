@@ -11,6 +11,7 @@ const {
   excluirDependente,
   criarRelacaoAcompanhanteDependente,
   buscarDependentePorNome,
+  buscarDependentePorEmail
 } = require('../Model/dependenteModel.js'); // Adjust path if necessary
 const AppError = require('../Utils/appError.js');
 const catchAsync = require('../Utils/catchAsync.js');
@@ -64,13 +65,13 @@ exports.cadastrar = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync(async (req, res, next) => {
-  const { nome, senha } = req.body;
+  const { email, senha } = req.body;
 
-  if (!nome || !senha) {
+  if (!email || !senha) {
     return next(new AppError('Name and password are required.', 400));
   }
 
-  const dependente = await buscarDependentePorNome(nome);
+  const dependente = await buscarDependentePorEmail(email);
 
   if (!dependente || !(await bcrypt.compare(senha, dependente.senha))) {
     return next(new AppError('Invalid name or password.', 401));
@@ -81,11 +82,14 @@ exports.login = catchAsync(async (req, res, next) => {
     tipo: 'dependente'
   };
 
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+   const token = jwt.sign(payload, process.env.JWT_SECRET);
 
   const { senha: _, ...dependenteInfo } = dependente;
 
   res.status(200).json({
+    userId: dependente.id, // Include userId in response for client-side use
+    userName: dependente.nome, // Include userName for client-side use
+    userType: 'dependente', // Include userType for client-side use
     status: 'success',
     message: 'Login successful!',
     token,

@@ -54,16 +54,24 @@ const createActivity = catchAsync(async (req, res, next) => {
  */
 const getActivities = catchAsync(async (req, res, next) => {
   const { id_idoso } = req.params;
+  const { type } = req.query; // <-- pega o filtro do query param
+
   if (!id_idoso) {
     return next(new AppError("Dependent ID (id_idoso) is required in URL parameters.", 400));
   }
 
-  const activities = await routineServices.getActivitiesForDependent(id_idoso);
+  let activity = await routineServices.getActivitiesForDependent(id_idoso);
+
+  // Se o filtro 'type' foi enviado, filtra as atividades
+  if (type) {
+    activity = activity.filter(act => act.type === type);
+  }
+
   res.status(200).json({
     status: 'success',
-    results: activities.length,
+    results: activity.length,
     data: {
-      activities
+      activity
     }
   });
 });

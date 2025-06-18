@@ -78,10 +78,13 @@ exports.login = catchAsync(async (req, res, next) => {
     tipo: 'acompanhante',
   };
 
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15d' });
   const { senha: _, ...acompanhanteInfo } = acompanhante;
 
   res.status(200).json({
+    userId: acompanhante.id, // Include userId in response for client-side use
+    userName: acompanhante.nome, // Include userName for client-side use
+    userType: 'acompanhante', // Include userType for client-side use
     status: 'success',
     message: 'Login successful!',
     token: token,

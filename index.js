@@ -24,6 +24,7 @@ const { mongoConnection, postgresConnection } = require('./Config/instaceConn.js
 const routineRouters = require('./Api/Routes/routineRouters.js');
 const dependenteRoutes = require('./Api/Routes/dependenteRoutes.js');
 const acompanhanteRoutes = require('./Api/Routes/acompanhanteRoutes.js');
+const emergenciaRoutes = require('./Api/Routes/emergenciaRoutes.js');
 
 // 4. Importing custom modules/services
 const initializeSocketManager = require('./socketManager.js'); // Path to your socketManager
@@ -62,6 +63,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api', routineRouters);
 app.use('/api/dependents', dependenteRoutes);
 app.use('/api/caregivers', acompanhanteRoutes);
+app.use('/api/emergency', emergenciaRoutes);
+
 
 // --- DATABASE CONNECTION TEST (OPTIONAL) ---
 // ... (seu teste de conexão com Knex) ...
