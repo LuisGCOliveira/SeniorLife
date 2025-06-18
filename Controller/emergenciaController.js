@@ -1,5 +1,5 @@
 const emergenciaModel = require('../Model/emergenciaModel.js');
-const { io } = require('../../index.js');
+const io = require('../io').getIO();
 
 exports.criarEmergencia = async (req, res, next) => {
   const { dependente_id, nome, idade, alergias, historico, contato_emergencia } = req.body;

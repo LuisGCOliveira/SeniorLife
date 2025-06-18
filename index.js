@@ -43,12 +43,14 @@ const app = express();
 const server = http.createServer(app); // Create HTTP server from Express app
 
 // Initialize Socket.IO
+const ioModule = require('./io'); 
 const io = new Server(server, {
   cors: {
     origin: "*", // Adjust to your client's URL in production for security
     methods: ["GET", "POST"]
   }
 });
+ioModule.setIO(io);
 
 // Initialize Socket.IO manager (authentication, rooms, etc.)
 initializeSocketManager(io);

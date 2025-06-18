@@ -6,7 +6,7 @@
 
 const cron = require('node-cron');
 const DependentRoutine = require('../Model/dependentRoutine'); // Adjust path if necessary
-const { io } = require('../index.js'); // Adjust path if the 'io' instance is exported differently
+const io = require('../io').getIO(); // Adjust path if the 'io' instance is exported differently
 
 /**
  * @object schedulerService

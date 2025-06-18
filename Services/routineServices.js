@@ -10,7 +10,7 @@ const mongoose = require('mongoose'); // Mongoose is required to work with Objec
 
 // 2. Import the Socket.IO instance for real-time updates.
 // Ensure 'io' is correctly exported from your main app file (e.g., index.js).
-const { io } = require('../index.js'); // Adjust path if your io instance is exported differently
+const io = require('../io').getIO();// Adjust path if your io instance is exported differently
 
 /**
  * @description Adds a new activity to a dependent's routine. If the dependent
