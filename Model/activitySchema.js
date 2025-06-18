@@ -17,7 +17,7 @@ const ActivitySchema = new mongoose.Schema(
      * The title of the activity, e.g., "Morning Walk" or "Lunch".
      * This field is required and will have leading/trailing whitespace removed.
      */
-    titulo: { // Changed from 'title' to 'titulo' to match your previous validator example
+    title: { // Changed from 'title' to 'titulo' to match your previous validator example
       type: String,
       required: [true, 'Activity title (titulo) is required.'],
       trim: true,
@@ -27,7 +27,7 @@ const ActivitySchema = new mongoose.Schema(
      * Differentiates activities (e.g., physical activity, meal, medication).
      * Acts as a "tag" or "label".
      */
-    tipo: { // Changed from 'type' to 'tipo'
+    type: { // Changed from 'type' to 'tipo'
       type: String,
       required: true,
       enum: {

@@ -12,7 +12,7 @@ const { cadastrar, login } = require('../../Controller/dependenteController.js')
 
 // Assuming the middleware file is located at '../../Middleware/authAcompanhante.js'.
 // Adjust the path if your folder structure is different.
-const { autenticarAcompanhante } = require('./Api/Middleware/authAcompanhante.js');
+const { autenticarAcompanhante } = require('../Middleware/authAcompanhante.js');
 
 // Create a new router object to define a modular set of routes.
 const router = express.Router();

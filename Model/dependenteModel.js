@@ -31,9 +31,9 @@ const db = postgresConnection.getConnection(); // 'db' is now your Knex instance
 const criarDependente = async (dependentData) => {
   try {
     // Destructure known fields, pass the rest if your table has more columns
-    const { nome, email, senha, ...otherFields } = dependentData;
+    const { nome, email, senha, } = dependentData;
     const [newDependent] = await db('dependente')
-      .insert({ nome, email, senha, ...otherFields })
+      .insert({ nome, email, senha,  })
       .returning(['id', 'nome', 'email', 'criado_em']); // Add other fields you want returned
     return newDependent;
   } catch (err) {
@@ -71,13 +71,12 @@ const listarDependentes = async () => {
  *                                 (including the hashed password), or null if not found.
  * @throws {Error} If there's an error during the database operation.
  */
-const buscarDependentePorEmail = async (email) => {
+const buscarDependentePorNome = async (nome) => {
   try {
-    // Selects all fields, including password, useful if dependents can log in.
-    const dependent = await db('dependente').where({ email }).first();
+    const dependent = await db('dependente').where({ nome }).first();
     return dependent || null;
   } catch (err) {
-    console.error("Error in buscarDependentePorEmail model:", err);
+    console.error("Error in buscarDependentePorNome model:", err);
     throw err;
   }
 };
@@ -230,11 +229,11 @@ const verificarRelacaoAcompanhanteDependente = async (id_acompanhante, id_depend
 module.exports = {
   criarDependente,
   listarDependentes,
-  buscarDependentePorEmail,
   buscarDependentePorId,
   editarDependente,
   excluirDependente,
   criarRelacaoAcompanhanteDependente,
   listarDependentesPorAcompanhante,
   verificarRelacaoAcompanhanteDependente,
+  buscarDependentePorNome,
 };

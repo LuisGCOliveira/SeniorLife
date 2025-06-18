@@ -71,9 +71,9 @@ schedulerService.run();
 
 // --- ERROR HANDLING MIDDLEWARES ---
 // Handler para rotas não encontradas (404) - DEVE VIR ANTES DO errorHandler global
-app.all('*', (req, res, next) => {
-  next(new AppError(`Não foi possível encontrar ${req.originalUrl} neste servidor!`, 404));
-});
+//app.all('*', (req, res, next) => {
+  //next(new AppError());
+//});
 
 // REGISTRO DO MIDDLEWARE DE ERRO GLOBAL - DEVE SER O ÚLTIMO!
 app.use(errorHandler);

@@ -39,7 +39,7 @@ const validateCreateActivity = [
     .trim() // Remove leading/trailing whitespace.
     .notEmpty().withMessage('Title is required.'), // Must not be empty.
   body('type')
-    .isIn(['physical activity', 'feeding', 'medication']) // Must be one of these values.
+    .isIn(['atividade fisica', 'alimentação', 'medicação']) // Must be one of these values.
     .withMessage("Type must be 'physical activity', 'feeding', or 'medication'."),
   body('schedule')
     .isISO8601().withMessage('Schedule must be in ISO 8601 date format (UTC standard).') // Must be a valid ISO 8601 date string.
@@ -64,7 +64,7 @@ const validateUpdateActivity = [
     .notEmpty().withMessage('Title cannot be empty if provided.'), // If provided, it cannot be empty.
   body('type')
     .optional()
-    .isIn(['physical activity', 'feeding', 'medication'])
+    .isIn(['atividade fisica', 'alimentação', 'medicação'])
     .withMessage('Invalid activity type.'),
   body('schedule')
     .optional()

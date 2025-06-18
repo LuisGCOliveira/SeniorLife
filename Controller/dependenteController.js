@@ -10,9 +10,11 @@ const {
   editarDependente,
   excluirDependente,
   criarRelacaoAcompanhanteDependente,
+  buscarDependentePorNome,
 } = require('../Model/dependenteModel.js'); // Adjust path if necessary
 const AppError = require('../Utils/appError.js');
 const catchAsync = require('../Utils/catchAsync.js');
+const jwt = require('jsonwebtoken');
 
 /**
  * @async
@@ -24,7 +26,7 @@ const catchAsync = require('../Utils/catchAsync.js');
  */
 exports.cadastrar = catchAsync(async (req, res, next) => {
   const {
-    nome_completo,
+    nome,
     email,
     senha,
     // ...other dependent fields
@@ -32,7 +34,7 @@ exports.cadastrar = catchAsync(async (req, res, next) => {
 
   const id_acompanhante = req.acompanhante?.id; // From authAcompanhante middleware
 
-  if (!nome_completo || !email || !senha) {
+  if (!nome || !email || !senha) {
     return next(new AppError('Full name, email, and password for the dependent are required.', 400));
   }
   if (!id_acompanhante) {
@@ -40,7 +42,7 @@ exports.cadastrar = catchAsync(async (req, res, next) => {
   }
 
   const senhaHash = await bcrypt.hash(senha, 10);
-  const dependentData = { nome_completo, email, senha: senhaHash /*, ...other fields */ };
+  const dependentData = { nome, email, senha: senhaHash /*, ...other fields */ };
 
   const novoDependente = await criarDependente(dependentData);
   if (!novoDependente || !novoDependente.id) {
@@ -57,6 +59,38 @@ exports.cadastrar = catchAsync(async (req, res, next) => {
     message: 'Dependent registered and linked successfully!',
     data: {
       dependente: dependenteInfo,
+    }
+  });
+});
+
+exports.login = catchAsync(async (req, res, next) => {
+  const { nome, senha } = req.body;
+
+  if (!nome || !senha) {
+    return next(new AppError('Name and password are required.', 400));
+  }
+
+  const dependente = await buscarDependentePorNome(nome);
+
+  if (!dependente || !(await bcrypt.compare(senha, dependente.senha))) {
+    return next(new AppError('Invalid name or password.', 401));
+  }
+
+  const payload = {
+    id: dependente.id,
+    tipo: 'dependente'
+  };
+
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+  const { senha: _, ...dependenteInfo } = dependente;
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Login successful!',
+    token,
+    data: {
+      dependente: dependenteInfo
     }
   });
 });

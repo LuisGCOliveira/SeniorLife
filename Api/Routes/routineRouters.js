@@ -8,8 +8,8 @@ const express = require('express');
 const routineController = require('../../Controller/routineController.js');
 
 // Import authentication and permission middlewares
-const { autenticarAcompanhante } = require('./Api/Middleware/authAcompanhante.js');
-const { checkCaregiverPermission } = require('./Api/Middleware/permissionMiddleware.js');
+const { autenticarAcompanhante } = require('../Middleware/authAcompanhante.js');
+const { checkCaregiverPermission } = require('../Middleware/permissionMiddleware.js');
 
 // Import validation middlewares
 const {
