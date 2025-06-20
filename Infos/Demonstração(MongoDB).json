@@ -5,7 +5,8 @@
       "titulo": "Acordar",
       "horario": "08:00",
       "dias": ["segunda", "quarta", "sexta"],
-      "repetir": true
+      "repetir": true,
+      "descricao": "Alarme para acordar"
     }
   ],
   "notificacoes": [
