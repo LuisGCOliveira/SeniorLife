@@ -1,0 +1,57 @@
+name: meu_app
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.4.0
+  shared_preferences: ^2.2.3
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Pacote para gerar os ícones
+  flutter_launcher_icons: "^0.13.1"
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/elements/top_wave.png
+    - assets/elements/bottom_wave.png
+    - assets/icons/logo.png
+    - assets/icons/medication.png
+    - assets/icons/emergency.png
+    - assets/icons/physical_activity.png
+    - assets/icons/food.png
+    - assets/icons/ambulance.png
+    - assets/icons/home.png
+    - assets/elements/footer.png
+    - assets/icons/info_icon.png
+    
+    # IMPORTANTE: Se a sua imagem do ícone estiver em outro caminho,
+    # adicione-o aqui também. Ex:
+    # - assets/icons/meu_icone_final.png
+
+# ===============================================================
+# ADICIONADO: Configuração para o gerador de ícones
+# Este bloco deve ficar no final do arquivo, sem espaços à esquerda.
+# ===============================================================
+flutter_launcher_icons:
+  android: true
+  ios: true
+  # IMPORTANTE: Verifique se 'assets/icons/logo.png' é a imagem
+  # que você quer usar como ícone. Se for outra, ajuste o caminho aqui.
+  # A imagem deve ser de preferência quadrada e com boa resolução (ex: 1024x1024).
+  image_path: "assets/icons/logo.png"
+  remove_alpha_ios: true # <-- ADICIONE ESTA LINHA
